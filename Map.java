@@ -38,10 +38,8 @@ public class Map {
 	 * @param : The filename of the map file.
 	 */
 	public Map(String fileName) {
-
+		readMap(fileName);
 	}
-
-
     /**
      * Reads the map from file.
      *
@@ -50,14 +48,12 @@ public class Map {
     public void readMap(String fileName) {
 		try{
 			BufferedReader reader = new BufferedReader(new FileReader(fileName));
-			// Variables store Map Name and the number of Gold Required to win
-			String mapName = reader.readLine().replace("name ","");
-			int goldRequired = Integer.parseInt(reader.readLine().replace("win ",""));
+			// Variables store Map Name and the number of Gold to win
+			mapName = reader.readLine().replace("name ","");
+			goldRequired = Integer.parseInt(reader.readLine().replace("win ",""));
+			
 			//count the number of lines in the file and -2 to get the map count
 			int linesCount = numberOfLines(fileName) -2;
-			
-			
-			System.out.println(mapName+" "+goldRequired+" "+linesCount);
 			
 			//storing the map from the file in the map array
 			map = new char[linesCount][];
@@ -65,21 +61,15 @@ public class Map {
 				map[i] = reader.readLine().toCharArray();
 			}
 
-			for(char[] row:map){
-				System.out.println(row);
-
-			}
-
 			reader.close();
 
-
-			} 
-			catch (IOException e){
-				System.out.println("It ain't working");
-			}
+		} 
+		catch (IOException e){
+			System.out.println("File not Found");
+		}
     }
 
-
+	//get the number of lines in the map
 	public int numberOfLines(String fileName){
 		int lines = 0;
 		try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
@@ -89,4 +79,23 @@ public class Map {
 		}
 		return lines;
 	}
+
+	//displays the map to the screen
+	public void displayMap(){
+		char[][] currentMap = getMap();
+		for(char[] row:map){
+			System.out.println(row);
+		}
+	}
+
+	//method returns the current map
+	public char[][] getMap(){
+		return map;
+	}
+
+	//Total gold required to win the game
+	public int goldToWin(){
+		return goldRequired;
+	}
+	//Returns the sign in the given location
 }
