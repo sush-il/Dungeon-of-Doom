@@ -80,8 +80,7 @@ public class Map {
 	}
 
 	//displays the map to the screen
-	public void displayMap(){
-		char[][] currentMap = getMap();
+	public void displayMap(int[] playerLocation){
 		for(char[] row:map){
 			System.out.println(row);
 		}
@@ -97,23 +96,4 @@ public class Map {
 		return goldRequired;
 	}
 	//Returns the sign in the given location
-
-	public void smallMap(int[] userLocation){
-		char miniMap[][] = new char[5][5];
-		
-		for(int i = 0; i< 5; i++){
-			for(int j = 0; j< 5; j++){
-				try{
-					miniMap[i][j] = map[userLocation[0] - 2 + i][userLocation[1] - 2 + j];
-				}
-				catch (ArrayIndexOutOfBoundsException e) {
-					miniMap[i][j] = '#';
-				}
-			}
-		}
-		for(char[] rows:miniMap){
-			System.out.println(rows);
-		}
-		
-	}
 }
