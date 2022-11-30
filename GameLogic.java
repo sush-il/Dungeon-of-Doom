@@ -1,5 +1,5 @@
 //Contains the main logic part of the game, as it processes.
-import java.util.Arrays;
+//import java.util.Arrays;
 public class GameLogic {
 	
 	/* Reference to the map,player being used */
@@ -7,6 +7,7 @@ public class GameLogic {
 	private HumanPlayer player;
 	//location of the palyer
 	private int[] playerLocation;
+	private char replacer = 'G';
 	/**
 	 * Default constructor
 	 */
@@ -17,32 +18,40 @@ public class GameLogic {
 	public void runGame(){	
 		//generates a map from userinput
 		generateMap();
-		playerLocation = player.generateStartLocation(map.getMap());
-		//System.out.println(Arrays.toString(playerLocation));
-		//isValidLocation(locationValue(playerLocation[0],playerLocation[1]));
+		//spawns the player at a random location
 		spawnPlayer();
-		boolean gameRunning = true;
+		boolean gameRunning = gameRunning(true);
 		
 		while(gameRunning){		
+			//Ask user for command
 			System.out.println("Enter command: ");
 			String command = player.getCommand().toUpperCase();
 
 			switch(command){
 				case "HELLO":
 					System.out.println("Gold to Win: "+map.goldToWin());
+					break;
 				case "LOOK":
-					map.displayMap();
+					map.smallMap(playerLocation);;
+					break;
 				case "GOLD":
 					;
 
 				case "PICKUP":
 					;
+
+				case "QUIT":
+					;
+					
 			}
 
+			//Actions when move function is called
 			if(command.contains("MOVE ")){
 				String direction = command.split(" ")[1];
-				player.ValidMoveCommand(direction);
-				move(direction,playerLocation);
+				if(player.ValidMoveCommand(direction)){
+					move(direction,replacer);
+				}
+				
 			}
 		}
 	}
@@ -64,46 +73,75 @@ public class GameLogic {
 		return "";
 	}
 
+	//returns the value at location in map; i.e. # , G etc..
 	public char locationValue(int row,int col){
 		char[][] currentMap = map.getMap();
-		//returns the value at location in map; i.e. # . G etc..
-		//return currentMap[playerLocation[0]][playerLocation[1]];
 		return currentMap[row][col];
 	}
 
-	public boolean isValidLocation(char locationValue){
-		/*char[][] currentMap = map.getMap();*/
-		
-		if(locationValue != '#' && locationValue != 'G'){
+	// Check if the chosen location is valid; not a wall
+	public boolean isNotAWall(char locationValue){
+		if(locationValue != '#'){
 			return true;
 		}
-		else{
-			System.out.println("Not a valid location");
-			return false;
-		}
+		return false;
 	}
 
+	//Spawns the player at a random location
 	public void spawnPlayer(){
 		char[][] currentMap = map.getMap();
+		playerLocation = player.generateStartLocation(currentMap);
 		int row = playerLocation[0];
 		int col = playerLocation[1];
-		if(isValidLocation(locationValue(row, col))){
-			currentMap[playerLocation[0]][playerLocation[1]] = 'P';
+		boolean playerNotSpawned = true;
+		//ensure the location is valid; i.e. not a wall of gold
+		while(playerNotSpawned){
+			if(isNotAWall(locationValue(row, col)) && locationValue(row,col) != 'G'){
+				currentMap[playerLocation[0]][playerLocation[1]] = 'P';
+				playerNotSpawned = false;
+			}
+			else{
+				playerLocation = player.generateStartLocation(currentMap);
+			}
 		}
-		
 	}
 
-	public void move(String direction,int[] currentPosition){
+	//Control player movements
+	public void move(String direction,char replacer){
 		char[][] currentMap = map.getMap();
-        if(direction.equals("S")){
-			int row = playerLocation[0]+1;
-			int col = playerLocation[1];
-			if(isValidLocation(locationValue(row, col))){
-				currentMap[playerLocation[0]][col] = '.';
-				currentMap[row][col] = 'P';
-				playerLocation[0] = row;
-			};
-        }
+
+		int row = playerLocation[0];
+		int col = playerLocation[1];
+
+		switch(direction){
+			case "N":
+				row -= 1;
+				break;
+			case "E": 
+				col += 1;
+				break;
+
+			case "S":
+				row += 1;
+				break;
+
+			case "W":
+				col -= 1;
+				break;
+		}
+
+		char nxtValue = locationValue(row, col);
+		System.out.println(nxtValue);
+		//if valid moveg the player to the desired location
+		if(isNotAWall(locationValue(row, col))){
+			//temp = locationValue(row,col);
+			currentMap[playerLocation[0]][playerLocation[1]] = '.';
+			currentMap[row][col] = 'P';
+			playerLocation[0] = row;
+			playerLocation[1] = col;
+		};
+		System.out.println(replacer);
+		//replacer = nxtValue;	
     }
 
     /**
@@ -111,9 +149,14 @@ public class GameLogic {
 	 *
      * @return if the game is running.
      */
-    public boolean gameRunning() {
-        return false;
+    public boolean gameRunning(boolean value) {
+        return value;
     }
+
+	public void quit(){
+		System.out.println("Qutitting Game");
+		//System.exit(0);
+	}
 
     /**
 	 * Returns the gold required to win.
@@ -127,5 +170,5 @@ public class GameLogic {
 	public static void main(String[] args) {
 		GameLogic logic = new GameLogic();
 		logic.runGame();
-}
+	}
 }
