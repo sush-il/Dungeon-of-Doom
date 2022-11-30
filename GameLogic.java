@@ -6,12 +6,14 @@ public class GameLogic {
 	private HumanPlayer player;
 	//location of the palyer
 	private int[] playerLocation;
-	private char replacer = 'G';
+	//Total gold collected by the player
+	int goldCollected;
+
 
 	//Defaullt constructor 
 	public GameLogic() {
 		player = new HumanPlayer();
-		}
+	}
 
 	public void runGame(){	
 		//generates a map from userinput
@@ -33,21 +35,23 @@ public class GameLogic {
 					printMap(smallMap(playerLocation));
 					break;
 				case "GOLD":
-					;
+					countGold();
+					break;
 
 				case "PICKUP":
-					;
+					pickGold();
+					break;
 
 				case "QUIT":
-					;
-					
+					exit();
+					gameRunning = false;
+					break;	
 			}
-
 			//Actions when move function is called
 			if(command.contains("MOVE ")){
 				String direction = command.split(" ")[1];
 				if(player.ValidMoveCommand(direction)){
-					move(direction,replacer);
+					move(direction);
 				}
 				
 			}
@@ -58,7 +62,7 @@ public class GameLogic {
 	public String generateMap(){
 		System.out.println("Enter the name of the map or leave empty for default: ");
 		//user inputs a map to play
-		String name = "small_example_map"; //player.getCommand();
+		String name = player.getCommand();
 		String fileName = "";
 		if(! name.isEmpty()){
 			//Generate filename and return it
@@ -69,20 +73,6 @@ public class GameLogic {
 		}
 		map = new Map();
 		return "";
-	}
-
-	//returns the value at location in map; i.e. # , G etc..
-	public char locationValue(int row,int col){
-		char[][] currentMap = map.getMap();
-		return currentMap[row][col];
-	}
-
-	// Check if the chosen location is valid; not a wall
-	public boolean isNotAWall(char locationValue){
-		if(locationValue != '#'){
-			return true;
-		}
-		return false;
 	}
 
 	//Spawns the player at a random location
@@ -104,13 +94,26 @@ public class GameLogic {
 		}
 	}
 
-	//Control player movements
-	public void move(String direction,char replacer){
+	//returns the value at location in map; i.e. # , G etc..
+	public char locationValue(int row,int col){
 		char[][] currentMap = map.getMap();
+		return currentMap[row][col];
+	}
+
+	// Check if the chosen location is valid; not a wall
+	public boolean isNotAWall(char locationValue){
+		if(locationValue != '#'){
+			return true;
+		}
+		return false;
+	}
+
+	//Control player movements
+	public void move(String direction){
 
 		int row = playerLocation[0];
 		int col = playerLocation[1];
-
+		//Increment / Decrement player location based on choice
 		switch(direction){
 			case "N":
 				row -= 1;
@@ -127,21 +130,46 @@ public class GameLogic {
 				col -= 1;
 				break;
 		}
+		//If the new position is not a wall update player location
 		if(isNotAWall(locationValue(row, col))){
 			playerLocation[0] = row;
 			playerLocation[1] = col;
+			System.out.println("SUCCESS");
 		}
 		else{
-			System.out.println("Move Failed. Wall Ahead.");
+			System.out.println("FAIL");
 		}
     }
 
-	public void printMap(char[][] mapToPrint){
-		for(char[] row:mapToPrint){
-			System.out.println(row);
+	//pickup the gold when on a gold tile
+	public void pickGold(){
+		//total gold collected by the player
+		if(locationValue(playerLocation[0],playerLocation[1]) == 'G'){
+			goldCollected += 1;
+			System.out.println("SUCCESS");
+			countGold();
+			//empty tile when gold picked up
+			map.getMap()[playerLocation[0]][playerLocation[1]] = '.';
 		}
 	}
 
+	// Returns the total gold collected by the humanPlayer
+	public int countGold(){
+		System.out.println("GOLD COLLECTED: "+ goldCollected);
+		return goldCollected;
+	}
+
+	//Exit the map
+	public void exit(){
+		if(goldCollected == map.goldToWin() && locationValue(playerLocation[0],playerLocation[1]) == 'E'){
+			System.out.println("WIN!! GAME COMPLETE");
+		}
+		else{
+			System.out.println("FAIL!");
+		}
+	}
+
+	// 5x5 map visible to the player
 	public char[][] smallMap(int[] userLocation){
 		char miniMap[][] = new char[5][5];
 		
@@ -162,7 +190,13 @@ public class GameLogic {
 		return miniMap;
 	}
 
-    
+    //print out the given map
+	public void printMap(char[][] mapToPrint){
+		for(char[] row:mapToPrint){
+			System.out.println(row);
+		}
+	}
+	
 	//Checks if the game is running
     public boolean gameRunning(boolean value) {
         return value;

@@ -3,8 +3,9 @@ import java.util.Random;
 import java.util.Scanner;
 
 public class HumanPlayer {
-    //private int[] currentLocation;
     int[] currentLocation;
+    int goldOwned = 0;
+    
     public String getCommand(){
         //get user input and turn to upper case
         Scanner scan = new Scanner(System.in);
@@ -41,8 +42,8 @@ public class HumanPlayer {
         return currentLocation;
     }
 
-    public void goldOwned(){
-
+    public int goldOwned(){
+        return goldOwned;
     }
 
 }

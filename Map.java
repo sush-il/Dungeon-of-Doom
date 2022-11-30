@@ -95,5 +95,10 @@ public class Map {
 	public int goldToWin(){
 		return goldRequired;
 	}
+
+	//returns the name of the map
+	public String mapName(){
+		return mapName;
+	}
 	//Returns the sign in the given location
 }
