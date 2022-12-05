@@ -4,7 +4,6 @@ import java.io.FileReader;
 import java.io.IOException; // Class to handle IO errors
 
 public class Map {
-
 	/* Representation of the map */
 	private char[][] map;
 	/* Map name */
