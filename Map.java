@@ -8,7 +8,7 @@ public class Map {
 	private char[][] map;
 	/* Map name */
 	private String mapName;
-	/* Gold required for the human player to win */
+	/* Gold required for the player to win */
 	private int goldRequired;
 	
 	/**
