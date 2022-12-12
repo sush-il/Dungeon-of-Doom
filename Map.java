@@ -6,9 +6,7 @@ import java.io.IOException; // Class to handle IO errors
 public class Map {
 	/* Representation of the map */
 	private char[][] map;
-	/* Map name */
 	private String mapName;
-	/* Gold required for the player to win */
 	private int goldRequired;
 	
 	/**
@@ -32,7 +30,6 @@ public class Map {
 	
 	/**
 	 * Constructor that accepts a map to read in from.
-	 *
 	 * @param : The filename of the map file.
 	 */
 	public Map(String fileName) {
@@ -40,34 +37,33 @@ public class Map {
 	}
     /**
      * Reads the map from file.
-     *
      * @param : Name of the map's file.
      */
-    public void readMap(String fileName) {
+    public void readMap(String fileName){
 		try{
 			BufferedReader reader = new BufferedReader(new FileReader(fileName));
-			// Variables store Map Name and the number of Gold to win
+			
 			mapName = reader.readLine().replace("name ","");
 			goldRequired = Integer.parseInt(reader.readLine().replace("win ",""));
-			
-			//count the number of lines in the file and -2 to get the map count
 			int linesCount = numberOfLines(fileName) -2;
 			
-			//storing the map from the file in the map array
+			//storing the map from the file in the 2d array map
 			map = new char[linesCount][];
 			for(int i = 0; i<linesCount;i++){
 				map[i] = reader.readLine().toCharArray();
 			}
-
 			reader.close();
-
 		} 
+
 		catch (IOException e){
 			System.out.println("File not Found");
 		}
     }
 
-	//get the number of lines in the map
+	/** get the number of lines in the map
+	 * @param : name of the file
+	 * @return : number of lines in the file
+	*/
 	public int numberOfLines(String fileName){
 		int lines = 0;
 		try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
@@ -78,26 +74,18 @@ public class Map {
 		return lines;
 	}
 
-	//displays the map to the screen
-	public void displayMap(int[] playerLocation){
-		for(char[] row:map){
-			System.out.println(row);
-		}
-	}
-
-	//method returns the current map
+	/** @return the current map */
 	public char[][] getMap(){
 		return map;
 	}
 
-	//Total gold required to win the game
+	/** @return total gold required for win */
 	public int goldToWin(){
 		return goldRequired;
 	}
 
-	//returns the name of the map
+	/** @return name of the map */
 	public String mapName(){
 		return mapName;
 	}
-	//Returns the sign in the given location
 }
