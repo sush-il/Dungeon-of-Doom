@@ -1,11 +1,15 @@
 import java.util.Arrays;
+import java.io.File;
 import java.lang.Math;
 
+/** 
+ * The class deals with the main logic of the game. 
+*/
 public class GameLogic {
 	//declaring required variables
 	private Map map;
 	private HumanPlayer player;
-	private Bot bot;
+	private BotPlayer bot;
 
 	private char[][] mapInPlay;
 	private int[] playerLocation;
@@ -15,12 +19,13 @@ public class GameLogic {
 	int botGold;
 	boolean gameRunning;
 	
-	//Defaullt constructor 
+	//Default constructor
 	public GameLogic() {
 		player = new HumanPlayer();
-		bot = new Bot();
+		bot = new BotPlayer();
 	}
 
+	/** Begins the game */
 	public void runGame(){	
 		generateMap();
 		spawnPlayer();
@@ -34,18 +39,21 @@ public class GameLogic {
 			checkEnoughGold();
 
 			//If Bot in 5x5 grid of player it follows player
-			if(botInRange()){
+			if(bot.inRange(botLocation,playerLocation)){
 				followPlayer();
 			}
 			else{
 				spawnBot();
 			}
+
 			caughtByBot();
 		}
+
 	}
 
+	/** Checks all cases for player command */
 	public void checkCases(){
-		System.out.println("Enter command: ");
+		System.out.println("\nEnter command: ");
 		String command = player.getCommand().toUpperCase();
 
 		switch(command){
@@ -68,31 +76,59 @@ public class GameLogic {
 				exit();
 				gameRunning = false;
 				break;	
+			
+			default:
+				if(! command.contains("MOVE ")){
+					System.out.println("Invalid Command");
+				}
 		}
 		
-		if(command.contains("MOVE ")){
-			String direction = command.split(" ")[1];
-			if(player.ValidMoveCommand(direction)){
-				move(direction);
-			}	
+		try{
+			
+			if(command.contains("MOVE ")){
+				String direction = command.split(" ")[1];
+				if(player.ValidMoveCommand(direction)){
+					move(direction);
+				}
+				else{
+					System.out.println("Move is invalid");
+				}	
+			}
 		}
+		//Catch error when user types in "MOVE " without direction
+		catch(ArrayIndexOutOfBoundsException e){
+			System.out.println("Invalid Move! Direction not specified.");
+		}
+
 	}
 
 	/** Function generates a map based on users choice */
 	public void generateMap(){
-		System.out.println("Enter the name of the map or leave empty for default: ");
-		String name = "goldmap"; //player.getCommand(); //
+		System.out.println("Enter the name of the map (without extension) or leave empty for default: ");
+		String name = player.getCommand();
 		String fileName = "";
+		
 		if(! name.isEmpty()){
 			//Generate filename
-			fileName = "Example_maps/"+name+".txt";
-			map = new Map(fileName);
+			fileName = "./maps/"+name+".txt";
+			//Check if a file with the given name exists in the directory
+			boolean fileExists = new File("./", fileName).exists();
 			
+			if(fileExists){
+				map = new Map(fileName);
+			}
+			else{
+				System.out.println("File not valid \nDefault map loaded");
+				map = new Map();
+			}
 		}
+		
 		else{
 			map = new Map();
 			System.out.println("Default Map Loaded");
-		}	
+		}
+		System.out.println("\nMap Name: " + map.mapName());
+		System.out.println("Gold Required to Win: "+ map.goldToWin());
 	}
 
 	/** Spawns the player at a random location */
@@ -124,10 +160,9 @@ public class GameLogic {
 		
 		boolean botNotSpawned = true;
 		
-		//get new locations until a valid one is found
 		while(botNotSpawned){
-			//ensure the location is valid; i.e. not a wall or gold
-			if(isNotAWall(locationValue(botLocation[0],botLocation[1])) && locationValue(botLocation[0],botLocation[1]) != 'G'){
+			//ensure spawn location is valid; i.e. not a wall or gold or the player
+			if(isNotAWall(locationValue(botLocation[0],botLocation[1])) && locationValue(botLocation[0],botLocation[1]) != 'G' && locationValue(botLocation[0],botLocation[1]) != 'P'){
 				botNotSpawned = false;				
 			}
 			else{
@@ -136,21 +171,10 @@ public class GameLogic {
 		}	
 	}
 
-	/** @return if bot is within 5x5 map range (true,false) */
-	public boolean botInRange(){
-		//check if distance between bot and player is <= 2 write the bot in the 5x5 map
-		if(Math.abs(botLocation[0] - playerLocation[0]) <= 2 && Math.abs(botLocation[1] - playerLocation[1]) <= 2 ){
-			return true;
-		}
-		return false;
-	}
-
 	/** @return 5x5 map with bot written to the location  */
 	public char[][] writeBot(){
-		char[][] currentMap = map.getMap();
-
 		try{
-			if(botInRange()){
+			if(bot.inRange(botLocation,playerLocation)){
 				int row = Math.abs(2 - (playerLocation[0] - botLocation[0]));
 				int col = Math.abs(2 - (playerLocation[1] - botLocation[1]));
 				mapInPlay = smallMap(playerLocation);
@@ -190,10 +214,9 @@ public class GameLogic {
 	@param direction N,E,S,w
 	*/
 	public void move(String direction){
-		//checkEnoughGold();
 		int row = playerLocation[0];
 		int col = playerLocation[1];
-		//Increment / Decrement player location based on choice
+		// Increment / Decrement player location based on choice
 		switch(direction){
 			case "N":
 				row -= 1;
@@ -210,6 +233,7 @@ public class GameLogic {
 				col -= 1;
 				break;
 		}
+
 		if(isNotAWall(locationValue(row, col))){
 			playerLocation[0] = row;
 			playerLocation[1] = col;
@@ -237,7 +261,7 @@ public class GameLogic {
 		else if(botLocation[1]<playerLocation[1] && isNotAWall(locationValue(botLocation[0], botLocation[1]+1))){
 			botLocation[1] += 1;
 		}
-		//compare Column
+		//compare Columns
 		else if(botLocation[0]>playerLocation[0] && isNotAWall(locationValue(botLocation[0]-1, botLocation[1]))){
 			botLocation[0] -= 1;
 		}
@@ -250,12 +274,20 @@ public class GameLogic {
 		}
 	}
 
-	/** pickup the gold when on a gold tile */
+	/**
+	 * pickup the gold when on a gold tile
+	 * @param : playerCord Co-ordinates of teh player (bot/humanPlayer) 
+	 */
 	public void pickGold(int[] playerCord){
 		if(locationValue(playerCord[0],playerCord[1]) == 'G'){
 			incrGold(playerCord);
 			//replace with empty tile when gold picked up
 			map.getMap()[playerCord[0]][playerCord[1]] = '.';
+		}
+		else{
+			if(Arrays.equals(playerLocation, playerCord)){
+				System.out.println("No Gold at this location.");
+			}	
 		}
 	}
 
@@ -278,6 +310,7 @@ public class GameLogic {
 		return goldCollected;
 	}
 
+	/** Check how many gold left in the map */
 	public int goldLeft(){
 		int goldLeft = 0;
 		for(int i = 0; i< map.getMap().length; i++){
@@ -287,20 +320,22 @@ public class GameLogic {
 				}
 			}
 		}
-		//System.out.println("Gold left: "+goldLeft);
+		
 		return goldLeft;
 	}
 
+	/** Checks if there is enough gold in the map for the humanPlayer to win */
 	public void checkEnoughGold(){
 		if(goldLeft()<map.goldToWin() && (goldCollected+goldLeft()) < map.goldToWin()){
 			gameRunning = false;
 			System.out.println("Not enough gold left in the map for WIN. Game Over.");
 		}
 	}
+	
 	/**
 	 * creates a 5x5 map visible to the player
 	 * @param : userLocation --> The co-ordinates of the player
-	 * @return : 5x5 2d array
+	 * @return : 5x5 2d array, map currently in play
 	*/
 	public char[][] smallMap(int[] userLocation){
 		char miniMap[][] = new char[5][5];

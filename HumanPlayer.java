@@ -2,6 +2,7 @@
 import java.util.Scanner;
 
 public class HumanPlayer extends player{
+    
     //get input from the player
     public String getCommand(){
         Scanner scan = new Scanner(System.in);
@@ -9,8 +10,10 @@ public class HumanPlayer extends player{
         return input;
     }
 
-    /*function checks if the given direction is valid
-     * @param: direction --> takes the direction entered by the user
+    /**
+     * function checks if the given direction is valid
+     * @param : direction --> takes the direction entered by the user
+     * @return : boolean value (true,false)
     */
     public boolean ValidMoveCommand(String direction){
         String[] directions = {"N","E","S","W"};

@@ -1,5 +1,6 @@
 import java.util.Random;
 
+/** Contains the methods and attribures inherited by both players */
 public class player {
     int[] currentLocation;
     int goldOwned = 0;
@@ -17,12 +18,12 @@ public class player {
         return currentLocation;
     }
     
-    //returns the current postion of the human player
+    /** @return the current postion of the player */
     public int[] getCurrentPosition(){
         return currentLocation;
     }
 
-    //Returns the total gold the player owns
+    /** @return the gold owned by the player */
     public int goldOwned(){
         return goldOwned;
     }
